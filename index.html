@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TypeRacer</title>
+
     <!-- Google Fonts: Alegreya and Nunito -->
     <link
       href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&family=Nunito:wght@400;700&display=swap"
@@ -16,8 +17,81 @@
       rel="stylesheet"
       crossorigin="anonymous"
     />
+
+    <!-- Local styles (wired to the Google Fonts) -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
   </head>
   <body>
+    <!-- Header / Hero -->
+    <header class="py-4 site-header">
+      <div class="container text-center">
+        <h1 class="mb-2" style="font-family: var(--font-serif)">TypeRacer</h1>
+        <button type="button" class="btn btn-light">Instructions</button>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="container my-4">
+      <div class="row g-4">
+        <!-- Left column: controls and typing area -->
+        <section class="col-lg-8">
+          <div class="mb-3 d-flex align-items-center gap-2">
+            <label class="me-2 mb-0">Select Difficulty</label>
+            <select class="form-select w-auto">
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Hard</option>
+            </select>
+          </div>
+
+          <h5>Test your typing speed by typing the text shown below:</h5>
+
+          <div class="card mb-3">
+            <div class="card-body">The cat sat on the mat.</div>
+          </div>
+
+          <div class="mb-3">
+            <textarea
+              class="form-control"
+              rows="6"
+              placeholder="Click the start button to begin the test"
+            ></textarea>
+          </div>
+
+          <div class="d-flex gap-2 justify-content-center control-buttons">
+            <button type="button" class="btn btn-outline-warning px-4">
+              Start
+            </button>
+            <button type="button" class="btn btn-outline-warning px-4">
+              Stop
+            </button>
+            <button type="button" class="btn btn-outline-warning px-4">
+              Retry
+            </button>
+          </div>
+        </section>
+
+        <!-- Right column: results card -->
+        <aside class="col-lg-4">
+          <div class="card border-0 results-card">
+            <div class="card-body text-center">
+              <h4 class="card-title mb-3">Results</h4>
+              <p class="mb-1"><strong>Level:</strong> Easy</p>
+              <p class="mb-1"><strong>Time:</strong> 0s</p>
+              <p class="mb-0"><strong>WPM:</strong> 0</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="py-4 text-center text-muted">
+      <div class="container">
+        This is an educational project, exploring AI augmented software
+        development
+      </div>
+    </footer>
+
     <!-- Font Awesome Kit -->
     <script
       src="https://kit.fontawesome.com/c159c8881b.js"
