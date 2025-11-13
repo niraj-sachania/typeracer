@@ -29,7 +29,89 @@ function setSampleTextFor(level) {
   const el = document.getElementById("sample-text");
   if (!el) return;
   const text = TypingSamples.pickRandom(level);
-  el.textContent = text;
+  renderSampleText(text);
+  // clear user input when sample changes
+  const textarea = document.querySelector("textarea");
+  if (textarea) textarea.value = "";
+  // reset highlights and results
+  updateHighlightsFromInput("");
+  setResultWpm(0);
+  setResultTime(0);
+  setResultLevel(level || "easy");
+}
+
+// Current sample words (array of strings)
+let _currentSampleWords = [];
+
+function renderSampleText(sampleText) {
+  const el = document.getElementById("sample-text");
+  if (!el) return;
+  // split into words, preserve simple punctuation as part of words
+  const words = String(sampleText).trim().split(/\s+/).filter(Boolean);
+  _currentSampleWords = words;
+  // clear
+  el.innerHTML = "";
+  words.forEach((w, i) => {
+    const span = document.createElement("span");
+    span.className = "sample-word pending";
+    span.setAttribute("data-word-index", String(i));
+    span.textContent = w;
+    el.appendChild(span);
+    // add a space node after each word for spacing
+    el.appendChild(document.createTextNode(" "));
+  });
+}
+
+function updateHighlightsFromInput(userText) {
+  const sampleSpans = document.querySelectorAll("#sample-text .sample-word");
+  if (!sampleSpans || sampleSpans.length === 0) return;
+  const raw = String(userText || '');
+  const endedWithSpace = /\s$/.test(raw);
+  const userWords = raw.trim().split(/\s+/).filter(Boolean);
+
+  sampleSpans.forEach((span, idx) => {
+    const userWord = userWords[idx];
+    const sampleWord = _currentSampleWords[idx] || "";
+    span.classList.remove("correct", "incorrect", "pending");
+
+    // user hasn't reached this word yet
+    if (userWord === undefined) {
+      span.classList.add("pending");
+      return;
+    }
+
+    const isLastTyped = idx === userWords.length - 1;
+
+    // If this is the last word currently being typed and the user hasn't
+    // finished it (no trailing space), treat it as 'in-progress'. Only mark
+    // incorrect when the typed characters do not match the beginning of the
+    // sample word (i.e., a mistyped character). If the prefix matches,
+    // keep it pending until the user completes the word (presses space).
+    if (isLastTyped && !endedWithSpace) {
+      if (sampleWord.startsWith(userWord)) {
+        span.classList.add("pending");
+      } else {
+        span.classList.add("incorrect");
+      }
+      return;
+    }
+
+    // For completed words (user typed a space after them), require exact match
+    // to mark correct; otherwise mark incorrect.
+    if (userWord === sampleWord) {
+      span.classList.add("correct");
+    } else {
+      span.classList.add("incorrect");
+    }
+  });
+}
+
+function initRealtimeHighlighting() {
+  const textarea = document.querySelector("textarea");
+  if (!textarea) return;
+  textarea.addEventListener("input", (e) => {
+    updateHighlightsFromInput(e.target.value || "");
+  });
 }
 
 function initSampleSelector() {
@@ -186,6 +268,7 @@ function initTimerControls() {
 function initApp() {
   initSampleSelector();
   initTimerControls();
+  initRealtimeHighlighting();
 }
 
 document.addEventListener("DOMContentLoaded", initApp);

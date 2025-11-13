@@ -71,3 +71,24 @@ html {
   border: 2px solid var(--brand-orange);
   background: #fff;
 }
+
+/* Sample text word highlighting for realtime feedback */
+.sample-word {
+  display: inline-block;
+  padding: 0 0.15rem;
+  margin: 0 0.12rem;
+  white-space: pre-wrap;
+  border-radius: 0.25rem;
+}
+.sample-word.correct {
+  color: #0b63d6; /* blue */
+  background: rgba(11, 99, 214, 0.06);
+}
+.sample-word.incorrect {
+  color: #c62828; /* red */
+  background: rgba(198, 40, 40, 0.06);
+}
+.sample-word.pending {
+  color: inherit;
+  background: transparent;
+}
