@@ -57,21 +57,41 @@ function formatSeconds(sec) {
 }
 
 function setResultTime(seconds) {
-  const el = document.getElementById('result-time');
+  const el = document.getElementById("result-time");
   if (!el) return;
   el.textContent = formatSeconds(seconds);
 }
 
 function setResultLevel(level) {
-  const el = document.getElementById('result-level');
+  const el = document.getElementById("result-level");
   if (!el) return;
-  el.textContent = String(level).charAt(0).toUpperCase() + String(level).slice(1);
+  el.textContent =
+    String(level).charAt(0).toUpperCase() + String(level).slice(1);
+}
+
+// new helper: count correctly typed words (position-by-position)
+function calculateCorrectWords(userText, sampleText) {
+  if (!sampleText) return 0;
+  const sampleWords = sampleText.trim().split(/\s+/).filter(Boolean);
+  const userWords = String(userText).trim().split(/\s+/).filter(Boolean);
+  let correct = 0;
+  const len = Math.min(sampleWords.length, userWords.length);
+  for (let i = 0; i < len; i++) {
+    if (userWords[i] === sampleWords[i]) correct++;
+  }
+  return correct;
+}
+
+function setResultWpm(wpm) {
+  const el = document.getElementById("result-wpm");
+  if (!el) return;
+  el.textContent = String(Math.max(0, Math.round(wpm)));
 }
 
 function handleStartClick() {
   if (_running) return; // already running
-  const startBtn = document.getElementById('start-button');
-  const stopBtn = document.getElementById('stop-button');
+  const startBtn = document.getElementById("start-button");
+  const stopBtn = document.getElementById("stop-button");
   if (!startBtn || !stopBtn) return;
 
   _startTimeMs = performance.now();
@@ -83,12 +103,14 @@ function handleStartClick() {
 
   // reset displayed time while running
   setResultTime(0);
+  // reset WPM display while running
+  setResultWpm(0);
 }
 
 function handleStopClick() {
   if (!_running || _startTimeMs == null) return;
-  const startBtn = document.getElementById('start-button');
-  const stopBtn = document.getElementById('stop-button');
+  const startBtn = document.getElementById("start-button");
+  const stopBtn = document.getElementById("stop-button");
   if (!startBtn || !stopBtn) return;
 
   const elapsedMs = performance.now() - _startTimeMs;
@@ -96,6 +118,22 @@ function handleStopClick() {
 
   // display result rounded to two decimals
   setResultTime(seconds);
+
+  // compute correctly typed words vs sample text
+  const textarea = document.querySelector("textarea");
+  const sampleEl = document.getElementById("sample-text");
+  const sampleText = sampleEl ? sampleEl.textContent || "" : "";
+  const userText = textarea ? textarea.value : "";
+
+  const correctWords = calculateCorrectWords(userText, sampleText);
+
+  // compute WPM = correctWords per minute
+  const wpm = seconds > 0 ? (correctWords * 60) / seconds : 0;
+  setResultWpm(wpm);
+
+  // display current difficulty level in results
+  const select = document.getElementById("difficulty-select");
+  setResultLevel(select ? select.value || "easy" : "easy");
 
   // UI state: enable start, disable stop
   startBtn.disabled = false;
@@ -107,29 +145,29 @@ function handleStopClick() {
 
 function handleRetryClick() {
   // Reset state so user can start again
-  const startBtn = document.getElementById('start-button');
-  const stopBtn = document.getElementById('stop-button');
-  const textarea = document.querySelector('textarea');
-  if (textarea) textarea.value = '';
+  const startBtn = document.getElementById("start-button");
+  const stopBtn = document.getElementById("stop-button");
+  const textarea = document.querySelector("textarea");
+  if (textarea) textarea.value = "";
   if (startBtn) startBtn.disabled = false;
   if (stopBtn) stopBtn.disabled = true;
   _running = false;
   _startTimeMs = null;
   setResultTime(0);
   // reset WPM display if present
-  const wpmEl = document.getElementById('result-wpm');
-  if (wpmEl) wpmEl.textContent = '0';
+  const wpmEl = document.getElementById("result-wpm");
+  if (wpmEl) wpmEl.textContent = "0";
 }
 
 function initTimerControls() {
-  const startBtn = document.getElementById('start-button');
-  const stopBtn = document.getElementById('stop-button');
-  const retryBtn = document.getElementById('retry-button');
-  const select = document.getElementById('difficulty-select');
+  const startBtn = document.getElementById("start-button");
+  const stopBtn = document.getElementById("stop-button");
+  const retryBtn = document.getElementById("retry-button");
+  const select = document.getElementById("difficulty-select");
 
-  if (startBtn) startBtn.addEventListener('click', handleStartClick);
-  if (stopBtn) stopBtn.addEventListener('click', handleStopClick);
-  if (retryBtn) retryBtn.addEventListener('click', handleRetryClick);
+  if (startBtn) startBtn.addEventListener("click", handleStartClick);
+  if (stopBtn) stopBtn.addEventListener("click", handleStopClick);
+  if (retryBtn) retryBtn.addEventListener("click", handleRetryClick);
 
   // Ensure initial button states
   if (startBtn) startBtn.disabled = false;
@@ -137,9 +175,11 @@ function initTimerControls() {
 
   // When difficulty changes, update the result level label too
   if (select) {
-    select.addEventListener('change', () => setResultLevel(select.value || 'easy'));
+    select.addEventListener("change", () =>
+      setResultLevel(select.value || "easy")
+    );
     // set initial level
-    setResultLevel(select.value || 'easy');
+    setResultLevel(select.value || "easy");
   }
 }
 
