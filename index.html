@@ -63,13 +63,13 @@
           </div>
 
           <div class="d-flex gap-2 justify-content-center control-buttons">
-            <button type="button" class="btn btn-outline-warning px-4">
+            <button id="start-button" type="button" class="btn btn-outline-warning px-4">
               Start
             </button>
-            <button type="button" class="btn btn-outline-warning px-4">
+            <button id="stop-button" type="button" class="btn btn-outline-warning px-4" disabled>
               Stop
             </button>
-            <button type="button" class="btn btn-outline-warning px-4">
+            <button id="retry-button" type="button" class="btn btn-outline-warning px-4">
               Retry
             </button>
           </div>
@@ -80,9 +80,9 @@
           <div class="card border-0 results-card">
             <div class="card-body text-center">
               <h4 class="card-title mb-3">Results</h4>
-              <p class="mb-1"><strong>Level:</strong> Easy</p>
-              <p class="mb-1"><strong>Time:</strong> 0s</p>
-              <p class="mb-0"><strong>WPM:</strong> 0</p>
+              <p class="mb-1"><strong>Level:</strong> <span id="result-level">Easy</span></p>
+              <p class="mb-1"><strong>Time:</strong> <span id="result-time">0.00s</span></p>
+              <p class="mb-0"><strong>WPM:</strong> <span id="result-wpm">0</span></p>
             </div>
           </div>
         </aside>
