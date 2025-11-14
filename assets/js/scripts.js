@@ -133,9 +133,14 @@ function initSampleSelector() {
 
 let _startTimeMs = null;
 let _running = false;
+let _animationFrameId = null;
 
 function formatSeconds(sec) {
-  return `${sec.toFixed(2)}s`;
+  // Round to nearest whole second and format as mm:ss (e.g. "01:05")
+  const total = Math.max(0, Math.round(sec));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 function setResultTime(seconds) {
@@ -176,17 +181,33 @@ function handleStartClick() {
   const stopBtn = document.getElementById("stop-button");
   if (!startBtn || !stopBtn) return;
 
+  // start timer
   _startTimeMs = performance.now();
   _running = true;
+
+  // cancel any previous animation frame (safety)
+  if (_animationFrameId != null) {
+    cancelAnimationFrame(_animationFrameId);
+    _animationFrameId = null;
+  }
 
   // UI state: disable start, enable stop
   startBtn.disabled = true;
   stopBtn.disabled = false;
 
-  // reset displayed time while running
+  // reset displayed time and wpm while running
   setResultTime(0);
-  // reset WPM display while running
   setResultWpm(0);
+
+  // start updating the live timer using requestAnimationFrame
+  function _updateTimerFrame() {
+    if (!_running || _startTimeMs == null) return;
+    const seconds = (performance.now() - _startTimeMs) / 1000;
+    setResultTime(seconds);
+    _animationFrameId = requestAnimationFrame(_updateTimerFrame);
+  }
+
+  _animationFrameId = requestAnimationFrame(_updateTimerFrame);
 }
 
 function handleStopClick() {
@@ -222,6 +243,12 @@ function handleStopClick() {
   stopBtn.disabled = true;
 
   _running = false;
+  // stop animation frame updates
+  if (_animationFrameId != null) {
+    cancelAnimationFrame(_animationFrameId);
+    _animationFrameId = null;
+  }
+
   _startTimeMs = null;
 }
 
@@ -234,6 +261,12 @@ function handleRetryClick() {
   if (startBtn) startBtn.disabled = false;
   if (stopBtn) stopBtn.disabled = true;
   _running = false;
+  // cancel any running frame updates
+  if (_animationFrameId != null) {
+    cancelAnimationFrame(_animationFrameId);
+    _animationFrameId = null;
+  }
+
   _startTimeMs = null;
   setResultTime(0);
   // reset WPM display if present
