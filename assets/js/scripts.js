@@ -65,7 +65,7 @@ function renderSampleText(sampleText) {
 function updateHighlightsFromInput(userText) {
   const sampleSpans = document.querySelectorAll("#sample-text .sample-word");
   if (!sampleSpans || sampleSpans.length === 0) return;
-  const raw = String(userText || '');
+  const raw = String(userText || "");
   const endedWithSpace = /\s$/.test(raw);
   const userWords = raw.trim().split(/\s+/).filter(Boolean);
 
@@ -109,8 +109,25 @@ function updateHighlightsFromInput(userText) {
 function initRealtimeHighlighting() {
   const textarea = document.querySelector("textarea");
   if (!textarea) return;
+  // Update highlights as the user types
   textarea.addEventListener("input", (e) => {
-    updateHighlightsFromInput(e.target.value || "");
+    const val = e.target.value || "";
+    updateHighlightsFromInput(val);
+
+    // Start the timer automatically on the first non-whitespace keystroke
+    if (!_running && val.trim().length > 0) {
+      handleStartClick();
+    }
+  });
+
+  // Stop the test when Enter is pressed (prevent newline)
+  textarea.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      // ensure highlights are up to date before stopping
+      updateHighlightsFromInput(textarea.value || "");
+      handleStopClick();
+    }
   });
 }
 
@@ -140,7 +157,10 @@ function formatSeconds(sec) {
   const total = Math.max(0, Math.round(sec));
   const minutes = Math.floor(total / 60);
   const seconds = total % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+    2,
+    "0"
+  )}`;
 }
 
 function setResultTime(seconds) {
@@ -177,9 +197,6 @@ function setResultWpm(wpm) {
 
 function handleStartClick() {
   if (_running) return; // already running
-  const startBtn = document.getElementById("start-button");
-  const stopBtn = document.getElementById("stop-button");
-  if (!startBtn || !stopBtn) return;
 
   // start timer
   _startTimeMs = performance.now();
@@ -191,13 +208,18 @@ function handleStartClick() {
     _animationFrameId = null;
   }
 
-  // UI state: disable start, enable stop
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
+  // UI state: start/stop buttons removed from UI; nothing to toggle here
 
   // reset displayed time and wpm while running
   setResultTime(0);
   setResultWpm(0);
+
+  // ensure textarea is enabled and focused when starting
+  const textarea = document.querySelector("textarea");
+  if (textarea) {
+    textarea.disabled = false;
+    textarea.focus();
+  }
 
   // start updating the live timer using requestAnimationFrame
   function _updateTimerFrame() {
@@ -212,9 +234,6 @@ function handleStartClick() {
 
 function handleStopClick() {
   if (!_running || _startTimeMs == null) return;
-  const startBtn = document.getElementById("start-button");
-  const stopBtn = document.getElementById("stop-button");
-  if (!startBtn || !stopBtn) return;
 
   const elapsedMs = performance.now() - _startTimeMs;
   const seconds = elapsedMs / 1000;
@@ -234,13 +253,14 @@ function handleStopClick() {
   const wpm = seconds > 0 ? (correctWords * 60) / seconds : 0;
   setResultWpm(wpm);
 
+  // disable textarea after stopping so results are final
+  if (textarea) textarea.disabled = true;
+
   // display current difficulty level in results
   const select = document.getElementById("difficulty-select");
   setResultLevel(select ? select.value || "easy" : "easy");
 
-  // UI state: enable start, disable stop
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
+  // UI state: start/stop buttons removed from UI; nothing to toggle here
 
   _running = false;
   // stop animation frame updates
@@ -254,12 +274,9 @@ function handleStopClick() {
 
 function handleRetryClick() {
   // Reset state so user can start again
-  const startBtn = document.getElementById("start-button");
-  const stopBtn = document.getElementById("stop-button");
   const textarea = document.querySelector("textarea");
   if (textarea) textarea.value = "";
-  if (startBtn) startBtn.disabled = false;
-  if (stopBtn) stopBtn.disabled = true;
+  // start/stop buttons removed from UI; just reset the textarea and state
   _running = false;
   // cancel any running frame updates
   if (_animationFrameId != null) {
@@ -269,24 +286,21 @@ function handleRetryClick() {
 
   _startTimeMs = null;
   setResultTime(0);
+  // re-enable and focus the textarea on retry
+  if (textarea) {
+    textarea.disabled = false;
+    textarea.focus();
+  }
   // reset WPM display if present
   const wpmEl = document.getElementById("result-wpm");
   if (wpmEl) wpmEl.textContent = "0";
 }
 
 function initTimerControls() {
-  const startBtn = document.getElementById("start-button");
-  const stopBtn = document.getElementById("stop-button");
   const retryBtn = document.getElementById("retry-button");
   const select = document.getElementById("difficulty-select");
 
-  if (startBtn) startBtn.addEventListener("click", handleStartClick);
-  if (stopBtn) stopBtn.addEventListener("click", handleStopClick);
   if (retryBtn) retryBtn.addEventListener("click", handleRetryClick);
-
-  // Ensure initial button states
-  if (startBtn) startBtn.disabled = false;
-  if (stopBtn) stopBtn.disabled = true;
 
   // When difficulty changes, update the result level label too
   if (select) {
