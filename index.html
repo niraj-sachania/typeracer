@@ -24,9 +24,9 @@
   <body>
     <!-- Header / Hero -->
     <header class="py-4 site-header">
-      <div class="container text-center">
+        <div class="container text-center">
         <h1 class="mb-2" style="font-family: var(--font-serif)">TypeRacer</h1>
-        <button type="button" class="btn btn-light">Instructions</button>
+        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#instructionsModal">Instructions</button>
       </div>
     </header>
 
@@ -109,5 +109,30 @@
     ></script>
     <!-- Local scripts -->
     <script src="assets/js/scripts.js"></script>
+    <!-- Instructions Modal -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="instructionsModalLabel">Typing Test Instructions</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Welcome to TypeRacer — a simple typing speed test.</p>
+            <ul>
+              <li>Select a difficulty level from the dropdown.</li>
+              <li>Click <strong>Start</strong> to begin the timer and start typing in the box.</li>
+              <li>Correctly typed words will be highlighted in blue; mistakes will be highlighted in red.</li>
+              <li>Click <strong>Stop</strong> to finish the test and see your time and WPM.</li>
+              <li>Use <strong>Retry</strong> to clear the input and try again.</li>
+            </ul>
+            <p>Good luck — focus on accuracy first, then speed.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
